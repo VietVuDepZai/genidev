@@ -1,0 +1,40 @@
+{% extends 'student/studentbase.html' %}
+{% load widget_tweaks %}
+{% block content %}
+{% load static %}
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <link href="http://netdna.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<style>
+    p[data-f-id="pbf"] {
+        display: none !important
+    }
+</style>
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12 col-md-10">
+            <h2>Information of the assignment</h2>
+            <h6>Questions:</h6>
+            <p>{% render_field sol.body %}</p>
+            <h6>Submit:</h6>
+
+            <p>{{sol.submission_date}}</p>
+            <div><b>Points:</b> <span id="point">{{ sol.points }}</span></div>
+            <div><b>Comments:</b> {{ sol.comments }}</div>
+            <div><b>Ansered by {{ sol.student.user.username }}</b></div>
+
+        </div>
+    </div>
+</div>
+<br>
+<br>
+
+{% endblock %}

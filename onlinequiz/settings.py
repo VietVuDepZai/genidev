@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/3.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.0/ref/settings/
 """
+
 import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -33,7 +34,7 @@ SECRET_KEY = '@k0#p3kidu)yaaa3u1hplxz)f@^6xiy384*(+n@@s5x#1bx@m5'
 DEBUG = True
 
 USE_TZ = True 
-ALLOWED_HOSTS = ['0.0.0.0','onlinequiz-us1j.onrender.com','127.0.0.1','.vercel.app', '.now.sh','www.vutriviet.com','vutriviet.com']
+ALLOWED_HOSTS = ['0.0.0.0','onlinequiz-us1j.onrender.com','127.0.0.1','.vercel.app', '.now.sh','www.vutriviet.com','vutriviet.com','192.168.1.109']
 
 
 
@@ -53,10 +54,11 @@ INSTALLED_APPS = [
     'widget_tweaks',
     'froala_editor',
     'psycopg2',
-        'crispy_bootstrap4', 
-            'crispy_forms',
-
-
+    'crispy_bootstrap4', 
+    'crispy_forms',
+    'rest_framework',
+    "sslserver",
+    'django_extensions'
 
 ]
 
@@ -101,13 +103,15 @@ WSGI_APPLICATION = 'onlinequiz.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'fwcgcbqf', 
-        'USER': 'fwcgcbqf', 
-        'PASSWORD': 'H_Dz5ELPj8-qV6wVbvfIZ8jGmY_Cb1iA',
-        'HOST': 'arjuna.db.elephantsql.com', 
+        'NAME': 'qcuvtpqv', 
+        'USER': 'qcuvtpqv', 
+        'PASSWORD': 'OBZkZsEHreLIw3NT0ok9VaAPnIsrgjL9',
+        'HOST': 'tiny.db.elephantsql.com', 
         'PORT': '5432'
     }
 }
+
+SMS_BACKEND = 'sms.backends.console.SmsBackend'
 
 
 # Password validation

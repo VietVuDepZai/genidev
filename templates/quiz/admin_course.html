@@ -27,6 +27,72 @@
       border-radius: 20px;
     }
 
+    .panel-title {
+      padding-top: 10px;
+      background-color: rgb(3, 69, 135);
+      color: white;
+      padding-bottom: 10px;
+      margin-bottom: -10px;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+    }
+
+    li a {
+      color: white;
+      display: block;
+    }
+
+    li {
+      text-align: left;
+    }
+
+    ul.box {
+      display: block;
+      position: relative;
+    }
+
+    ul.box li {
+      display: none;
+      position: absolute;
+      width: 150px;
+      background: green;
+      top: 40px;
+      left: -116px;
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    ul.box:hover li {
+      display: block;
+      cursor: pointer;
+      transition-duration: 1s;
+
+    }
+
+    ul.box:hover span.only {
+      cursor: pointer;
+      transform: rotate(90deg);
+      -ms-transform: rotate(90deg);
+      -webkit-transform: rotate(90deg);
+      transition-duration: 2s;
+    }
+
+    ul.box li::before {
+      content: "";
+      position: absolute;
+      display: block;
+      border-style: solid;
+      border-width: 14px;
+      border-color: transparent transparent green transparent;
+      top: -27px;
+      right: 9px;
+    }
+
+    a:hover {
+      color: white;
+      opacity: 0.9;
+    }
+
     .bigtable::-webkit-scrollbar {
       display: none;
     }
@@ -42,26 +108,12 @@
     .panel-heading {
       width: 100%;
       position: relative;
-      top: 40px;
+      top: 41px;
+      height: 40px;
     }
 
     #dev-table {
-      margin-top: 39px
-    }
-
-    .panel-title {
-      padding-top: 10px;
-      background-color: rgb(3, 69, 135);
-      color: white;
-      padding-bottom: 10px;
-      margin-bottom: 0px;
-      border-top-left-radius: 20px;
-      border-top-right-radius: 20px;
-    }
-
-    .fas {
-      color: white;
-
+      margin-top: 40px
     }
   </style>
 </head>
@@ -69,9 +121,17 @@
 
 <div class="container">
   <div class="panel-heading">
-    <h6 class="panel-title">Courses </h6> <a href="{% url 'admin-add-course'  %}"
-      style="  color: white; float: right; background: green;;margin-top: -35px; margin-right: 15px; padding: 3px 5px"
-      class="btn btn-xs" href=""><span class="fas fa-plus"></span></a>
+    <h6 class="panel-title">Exams </h6>
+    <ul
+      style="  color: white; float: right; background: green;margin-top: -23px;margin-bottom: 0; border-radius: 2px;margin-right: 15px; padding: 3px 5px"
+      class="box" href=""><span class="only fas fa-plus"></span>
+
+      <li><a style="color:whitesmoke" href="{% url 'admin-add-course'  %}"><span class="fas fa-plus"></span> Add
+          exam</a>
+        <a style="color:whitesmoke" href="{% url 'admin-add-question'  %}"><span class="fas fa-plus"></span> Add
+          question</a>
+      </li>
+    </ul>
   </div>
   <div class="panel panel-primary bigtable">
 

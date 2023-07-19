@@ -1,0 +1,96 @@
+{% extends 'student/studentbase.html' %}
+{% block content %}
+{% load static %}
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <link href="http://netdna.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <style media="screen">
+        a:link {
+            text-decoration: none;
+            color: white
+        }
+
+        h6 {
+            text-align: center;
+        }
+
+
+
+        .panel {
+
+            border: 1px solid rgb(188, 188, 188);
+            border-radius: 20px;
+        }
+
+        .panel-title {
+            padding-top: 10px;
+            background-color: rgb(3, 69, 135);
+            color: white;
+            padding-bottom: 10px;
+            margin-bottom: 0px;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+    </style>
+</head>
+<br><br><br><br>
+
+<div class="container">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h6 class="panel-title">View Marks</h6>
+        </div>
+        <table class="table table-hover" id="dev-table">
+            <thead>
+                <tr>
+
+                    <th>Quiz Name</th>
+
+                    <th>Total Marks</th>
+                    <th>Attempt</th>
+                    <th>Quiz Date</th>
+                    <th>Deadline of Quiz</th>
+                </tr>
+            </thead>
+            {% for t in results %}
+            {% if t.close %}<tr>
+                <td> {{t.exam}}</td>
+                <td> {{t.marks}}/{{course.total_marks}}</td>
+                <td>Attemp {{ forloop.counter }}</td>
+                <td> {{t.date}}</td>
+                <td><a class="btn btn-info btn-xs" href="{% url 'view-exam' t.id  %}"><span
+                            class="fas fa-eye"></span></a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td> {{t.exam}}</td>
+                <td> {{t.marks}}/{{course.total_marks}}</td>
+                <td>Attemp {{ forloop.counter }}</td>
+                <td> {{t.date}}</td>
+                <td> The exam isn't closed yet</td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+            <!-- {% for a in results %}
+      <tr>
+        <td> {{a.exam}}</td>
+        <td> {{a.marks}}/{{course.total_marks}}</td>
+        <td>Attemp {{ forloop.counter }}</td>
+        <td> {{a.date}}</td>
+      </tr>
+      {% endfor %} -->
+        </table>
+    </div>
+</div>
+
+<br><br><br><br><br><br>
+{% endblock content %}

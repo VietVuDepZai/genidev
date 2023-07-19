@@ -1,0 +1,231 @@
+{% extends 'student/studentbase.html' %}
+{% block content %}
+{%load static%}
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <link href="http://netdna.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <style media="screen">
+        a:link {
+            text-decoration: none;
+        }
+
+        h6 {
+            text-align: center;
+        }
+
+        .panel {
+
+            border: 1px solid rgb(188, 188, 188);
+            border-radius: 20px;
+        }
+
+        .panel-title {
+            padding-top: 10px;
+            background-color: rgb(3, 69, 135);
+            color: white;
+            padding-bottom: 10px;
+            margin-bottom: -10px;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+
+        li a {
+            color: white;
+            display: block;
+        }
+
+        li {
+            text-align: left;
+        }
+
+        ul.box {
+            display: block;
+            position: relative;
+        }
+
+        ul.box li {
+            display: none;
+            position: absolute;
+            width: 150px;
+            background: green;
+            top: 40px;
+            left: -116px;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        ul.box:hover li {
+            display: block;
+            cursor: pointer;
+            transition-duration: 1s;
+
+        }
+
+        ul.box:hover span.only {
+            cursor: pointer;
+            transform: rotate(90deg);
+            -ms-transform: rotate(90deg);
+            -webkit-transform: rotate(90deg);
+            transition-duration: 2s;
+        }
+
+        ul.box li::before {
+            content: "";
+            position: absolute;
+            display: block;
+            border-style: solid;
+            border-width: 14px;
+            border-color: transparent transparent green transparent;
+            top: -27px;
+            right: 9px;
+        }
+
+        a:hover {
+            color: white;
+            opacity: 0.9;
+        }
+
+        .bigtable::-webkit-scrollbar {
+            display: none;
+        }
+
+        .bigtable {
+            -ms-overflow-style: none;
+            /* IE and Edge */
+            scrollbar-width: none;
+            /* Firefox */
+            overflow: scroll;
+        }
+
+        .panel-heading {
+            width: 100%;
+            position: relative;
+            top: 41px;
+            height: 40px;
+        }
+
+        #dev-table {
+            margin-top: 40px
+        }
+    </style>
+</head>
+<br><br>
+
+<div class="container">
+    <div class="panel-heading">
+        <h6 class="panel-title">List of quiz in this resource </h6>
+        <ul style="  color: white; float: right; background: green;margin-top: -23px;margin-bottom: 0; border-radius: 2px;margin-right: 15px; padding: 3px 5px"
+            class="box" href=""><span class="only fas fa-plus"></span>
+
+            <li><a style="color:whitesmoke" href="/add_listofquiz"><span class="fas fa-plus"></span>
+                    Add
+                    list of quiz</a>
+                <a style="color:whitesmoke" href="/add_quiz"><span class="fas fa-plus"></span> Add
+                    question</a>
+            </li>
+        </ul>
+    </div>
+    <div class="panel panel-primary bigtable">
+
+        <table class="table table-hover" id="dev-table">
+            <thead>
+                <tr>
+
+                    <th>Course Name</th>
+                    <th>Total Question</th>
+                    <th>Total Marks</th>
+                    <th>Attempt </th>
+                    <th>Action</th>
+
+                </tr>
+            </thead>
+            {% for t in courses %}
+            {% if t.close %}
+            <tr>
+                <td> {{t.course_name}}</td>
+                <td>{{t.question_number}}</td>
+                <td>{{t.total_marks}}</td>
+                <td>{{t.atempt}}</td>
+
+                <!-- <td>{{t.close}}</td> -->
+                <td><a class="btn btn-primary btn-xs" href="/student/view_listofquiz/{{t.id}}"><span
+                            class="fas fa-eye"></span></a></td>
+            </tr>
+            {% else %}
+            <tr>
+                <td> {{t.course_name}}</td>
+                <td>{{t.question_number}}</td>
+                <td>{{t.total_marks}}
+                <td>{{t.atempt}}</td>
+
+                </td>
+                <!-- <td>{{t.close}}</td> -->
+                <td><a href="/student/take_quiz/{{t.id}}" class="btn btn-info btn-xs"><span class="fas fa-arrow-right"
+                            style="color:white"></span></a>
+                </td>
+
+
+            </tr>
+            {% endif %}
+            {% endfor %}
+        </table>
+    </div>
+</div>
+<br><br>
+
+<!-- <script>
+  const countdown = document.querySelector('.countdown');
+  var date = document.getElementById('invisible')
+  const course = document.getElementById("course")
+  // Set Launch Date (ms)
+  var datetime = date.innerHTML
+  var real_date = datetime.slice(0, -5);
+  const launchDate = new Date(real_date).getTime();
+
+  // Update every second
+  const intvl = setInterval(() => {
+    // Get todays date and time (ms)
+    const now = new Date().getTime();
+
+    // Distance from now and the launch date (ms)
+    const distance = launchDate - now;
+
+    // Time calculation
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor(
+      (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+    );
+    const mins = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    // Display result
+    countdown.innerHTML = `
+        <p>${days}<span>Days</span></p> 
+        <p>${hours}<span>Hours</span></p>
+        <p>${mins}<span>Minutes</span></p>
+        <p>${seconds}<span>Seconds</span></p>
+        `;
+
+    // If launch date is reached
+    if (distance < 0) {
+      // Stop countdown
+      clearInterval(intvl);
+      // Style and output text
+      countdown.style.color = '#17a2b8';
+      countdown.innerHTML = 'Launched!';
+      course.style.display = "none"
+    }
+  }, 1000);
+
+</script> -->
+
+<br><br><br><br><br><br>
+{% endblock content %}

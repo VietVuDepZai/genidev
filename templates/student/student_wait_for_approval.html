@@ -253,6 +253,11 @@
     // On load, call init function
     window.onload = function () {
       init();
+      setTimeout(
+        function () {
+          alert("You need to take a picture, then wait a few minutes for admin accept!")
+          window.location.replace("http://127.0.0.1:8000/");
+        }, 2000);
     }
   })();
 </script>

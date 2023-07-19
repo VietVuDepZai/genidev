@@ -1,0 +1,248 @@
+{% extends 'student/studentbase.html' %}
+{% block content %}
+{%load static%}
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <link href="http://netdna.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <style>
+        ul:where([role="list"]) {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        img {
+            max-width: 100%;
+            display: block;
+        }
+
+        section {
+            padding-block: clamp(2rem, 5vw, 3rem);
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font: inherit;
+        }
+
+        svg {
+            height: 2.5ex;
+            width: auto;
+            flex: none;
+            fill: currentColor;
+        }
+
+        .container {
+            width: min(100% - 2rem, 63em);
+            margin-inline: auto;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-header * {
+            margin: 0;
+        }
+
+        .section-title {
+            font-size: clamp(1.5rem, 3vw, 2rem);
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns:
+                repeat(auto-fit, minmax(min(20rem, 100%), 1fr));
+            gap: 1.5rem;
+            padding-block: 1.5rem;
+        }
+
+        .cards[data-layout="list"] {
+            grid-template-columns: 1fr;
+        }
+
+        .card {
+            width: min(100%, 20rem);
+            margin-inline: auto;
+            background-color: #fff;
+            border-radius: 0.5em;
+            overflow: hidden;
+            box-shadow: 1.95px 1.95px 2.6px rgba(0, 0, 0, 0.2);
+        }
+
+        .card__content {
+            display: grid;
+            gap: 1rem;
+            padding: 1rem;
+        }
+
+        .cards[data-layout="list"] .card {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 100px 1fr;
+            align-items: stretch;
+        }
+
+        .cards[data-layout="list"] .card__content {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        @media (width < 40em) {
+            .cards[data-layout="list"] .card {
+                grid-template-columns: 1fr 3fr;
+            }
+
+            .cards[data-layout="list"] .card__content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card * {
+            margin: 0;
+        }
+
+        .card__img-wrapper {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            overflow: hidden;
+        }
+
+        .card__img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card__content h3 {
+            text-transform: capitalize;
+        }
+
+        .button-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5em;
+        }
+
+        .button-group--collapse {
+            gap: 0;
+            border-radius: 0.25em;
+            overflow: hidden;
+            width: fit-content;
+        }
+
+        .button-group--collapse>.button {
+            border-radius: 0;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 0.5em 1.5em;
+            border-radius: 0.25em;
+            border: 0;
+
+            text-decoration: none;
+            background-color: #1b2435;
+            color: #fff;
+            transition: background-color 250ms ease;
+        }
+
+        .button:is(:hover, :focus-visible) {
+            background-color: #41d6ff;
+            color: #fff !important
+        }
+
+        .button:is(:hover, :focus-visible) i {
+            color: #fff !important
+        }
+
+        .button:active {
+            scale: 0.97;
+        }
+
+        .button:active i {
+            color: #fff !important
+        }
+
+        .button--icon-only {
+            padding: 0.5em;
+            background-color: #fff;
+            color: #1b2435;
+        }
+
+        .button.active {
+            background-color: #41d6ff;
+            color: #fff;
+        }
+    </style>
+</head>
+
+<div class="container">
+    <div class="section-header">
+        <h2 class="section-title">Assignments </h2>
+
+        <div class="button-group button-group--collapse">
+            <button class="button button--icon-only" data-control="list">
+                <svg viewBox="0 0 512 512" width="100" title="list">
+                    <path
+                        d="M80 368H16a16 16 0 0 0-16 16v64a16 16 0 0 0 16 16h64a16 16 0 0 0 16-16v-64a16 16 0 0 0-16-16zm0-320H16A16 16 0 0 0 0 64v64a16 16 0 0 0 16 16h64a16 16 0 0 0 16-16V64a16 16 0 0 0-16-16zm0 160H16a16 16 0 0 0-16 16v64a16 16 0 0 0 16 16h64a16 16 0 0 0 16-16v-64a16 16 0 0 0-16-16zm416 176H176a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h320a16 16 0 0 0 16-16v-32a16 16 0 0 0-16-16zm0-320H176a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h320a16 16 0 0 0 16-16V80a16 16 0 0 0-16-16zm0 160H176a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h320a16 16 0 0 0 16-16v-32a16 16 0 0 0-16-16z" />
+                </svg>
+            </button>
+            <button class="button button--icon-only active" data-control="grid">
+                <svg viewBox="0 0 512 512" width="100" title="th-large">
+                    <path
+                        d="M296 32h192c13.255 0 24 10.745 24 24v160c0 13.255-10.745 24-24 24H296c-13.255 0-24-10.745-24-24V56c0-13.255 10.745-24 24-24zm-80 0H24C10.745 32 0 42.745 0 56v160c0 13.255 10.745 24 24 24h192c13.255 0 24-10.745 24-24V56c0-13.255-10.745-24-24-24zM0 296v160c0 13.255 10.745 24 24 24h192c13.255 0 24-10.745 24-24V296c0-13.255-10.745-24-24-24H24c-13.255 0-24 10.745-24 24zm296 184h192c13.255 0 24-10.745 24-24V296c0-13.255-10.745-24-24-24H296c-13.255 0-24 10.745-24 24v160c0 13.255 10.745 24 24 24z" />
+                </svg>
+            </button>
+
+        </div>
+    </div>
+    <ul role="list" class="cards" id="cards" data-layout="grid">
+        {% for course in assignments %}
+        <li>
+            <div class="card">
+                <div class="card__img-wrapper">
+                    <img class="card__img" src="{% static course.img.url %}" alt="">
+                </div>
+                <div class="card__content">
+                    <h3>{{course.name}}</h3>
+                    <p>Deadline: {{course.deadline}}</p>
+                    <a href="/student/start_assign/{{course.id}}" class="button">Start</a>
+                </div>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+
+<script>
+    const layoutControllerBtns = document.querySelectorAll("[data-control]");
+    const cardsElem = document.getElementById("cards");
+    layoutControllerBtns.forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            const layoutControl = e.currentTarget.dataset.control;
+            cardsElem.setAttribute("data-layout", layoutControl);
+            [...layoutControllerBtns].map(btn => btn.classList.remove("active"));
+            btn.classList.add("active");
+        });
+    });</script>
+<br><br><br><br><br><br>
+{% endblock content %}

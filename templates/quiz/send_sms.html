@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+{% load static %}
+{% load widget_tweaks %}
+<html lang="en" dir="ltr">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <link href="http://netdna.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <style>
+        @import url("https://fonts.googleapis.com/css?family=Open+Sans:100,200,300,400,500,600,700,800,900");
+
+        html,
+        body,
+        div,
+        span,
+        applet,
+        object,
+        iframe,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        p,
+        blockquote,
+        div pre,
+        a,
+        abbr,
+        acronym,
+        address,
+        big,
+        cite,
+        code,
+        del,
+        dfn,
+        em,
+        font,
+        img,
+        ins,
+        kbd,
+        q,
+        s,
+        samp,
+        small,
+        strike,
+        strong,
+        sub,
+        sup,
+        tt,
+        var,
+        b,
+        u,
+        i,
+        center,
+        dl,
+        dt,
+        dd,
+        ol,
+        ul,
+        li,
+        figure,
+        header,
+        nav,
+        section,
+        article,
+        aside,
+        footer,
+        figcaption,
+        button {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            outline: 0;
+        }
+
+        .html,
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: #474a56;
+        }
+
+        section {
+            padding-top: 50px;
+            padding-bottom: 50px;
+            background-color: #474a56;
+        }
+
+        section.contact-us #contact {
+            position: relative;
+            display: block;
+            min-width: 400px;
+            max-width: 600px;
+            height: auto;
+            background-color: #fff;
+            padding: 40px;
+            margin-left: auto;
+            margin-right: auto;
+            border-radius: 15px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        section.contact-us .section-heading {
+            position: relative;
+            display: block;
+            margin: auto;
+        }
+
+        .section-heading h4 {
+            line-height: 40px;
+            font-size: 28px;
+            font-weight: 900;
+            color: #dc8cdb;
+            text-align: center;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            position: relative;
+            display: block;
+            background-color: #f4f7fb;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 12px;
+            font-weight: 500;
+            border: none;
+            box-shadow: none;
+            border-radius: 5px;
+            outline-color: #9e9e9e;
+        }
+
+        input {
+            height: 40px;
+            padding: 0px 15px;
+        }
+
+        textarea {
+            min-height: 140px;
+            max-height: 180px;
+            padding: 15px;
+            resize: none;
+        }
+
+        textarea::-webkit-scrollbar {
+            display: none;
+        }
+
+
+        textarea {
+            -ms-overflow-style: none;
+            /* IE and Edge */
+            scrollbar-width: none;
+            /* Firefox */
+        }
+
+        #contact label {
+            height: 20px;
+            font-size: 12px;
+            margin-bottom: 20px;
+
+            display: inline-block;
+            font-size: 13px;
+            margin: 5px 2px;
+        }
+
+        .valid {
+            border: 2px solid green;
+            outline-color: green;
+        }
+
+        .invalid {
+            border: 2px solid red;
+            outline-color: red;
+        }
+
+        .btn {
+            display: inline-flex;
+            width: 100%;
+            justify-content: flex-end;
+        }
+
+        #form-submit {
+            position: relative;
+            display: inline-block;
+            float: right;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #fff;
+            background: rgb(219, 138, 222);
+            background: linear-gradient(-145deg, rgba(219, 138, 222, 1) 0%, rgba(246, 191, 159, 1) 100%);
+            padding: 12px 20px;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            transition: all .3s;
+            transition: all .3s;
+        }
+
+        #form-submit:disabled {
+            border: 1px solid #9e9e9e;
+            background: transparent;
+            color: #9e9e9e;
+            transition: none;
+            transform: none;
+            cursor: default;
+        }
+
+        #form-submit:hover:disabled {
+            border: 1px solid #9e9e9e;
+            color: #9e9e9e;
+            background: transparent;
+            transition: none;
+            transform: none;
+            cursor: default;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        button:focus {
+            outline: none;
+        }
+
+        button.ghost {
+            background-color: transparent;
+            border-color: #FFFFFF;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    {% include "quiz/navbar.html" %}
+    <br><br>
+
+    <section class="contact-us" id="contact-section">
+
+        <form method="POST" autocomplete="off" id="contact">
+            <div class="section-heading">
+                <h4>Contact us</h4>
+            </div>
+            <!-- Very Important csrf Token -->
+            {% csrf_token %}
+            <div class="form-group">
+
+                <p><label for="id_Name">Name:</label> <input type="text" name="name" maxlength="30" required=""
+                        id="id_Name">
+                </p>
+                <p><label for="id_Email">Phone number:</label> <input type="number" name="email" required=""
+                        id="id_Email"></p>
+                <p><label for="id_Message">Message:</label> <textarea name="text" cols="30" rows="3" maxlength="500"
+                        required="" id="id_Message"></textarea></p>
+
+                <br>
+                <input type="submit" id="form-submit" value="Send Message" class="main-gradient-button">
+            </div>
+        </form>
+    </section>
+
+    {% include "quiz/footer.html" %}
+</body>
+
+</html>

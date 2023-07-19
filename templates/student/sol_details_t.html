@@ -1,0 +1,93 @@
+{% extends 'student/studentbase.html' %}
+{% block content %}
+{%load static%}
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <link href="http://netdna.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <style media="screen">
+        a:link {
+            text-decoration: none;
+        }
+
+        h6 {
+            text-align: center;
+        }
+
+        .panel {
+
+            border: 1px solid rgb(188, 188, 188);
+            border-radius: 20px;
+        }
+
+        .panel-title {
+            padding-top: 10px;
+            background-color: rgb(3, 69, 135);
+            color: white;
+            padding-bottom: 10px;
+            margin-bottom: 0px;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+
+        .bigtable::-webkit-scrollbar {
+            display: none;
+        }
+
+        .bigtable {
+            -ms-overflow-style: none;
+            /* IE and Edge */
+            scrollbar-width: none;
+            /* Firefox */
+            overflow: scroll;
+        }
+
+        .panel-heading {
+            width: 100%;
+            position: relative;
+            top: 41px;
+            height: 40px;
+        }
+
+        #dev-table {
+            margin-top: 40px
+        }
+    </style>
+</head>
+<br><br>
+<div class="container">
+    <div class="panel-heading">
+        <h6 class="panel-title">Solutions</h6>
+    </div>
+    <div class="panel panel-primary">
+
+        <table class="table table-hover bigtable" id="dev-table">
+            <thead>
+                <tr>
+
+                    <th>Title</th>
+                    <th>Submission Date</th>
+                    <th>Ansered by</th>
+
+                </tr>
+            </thead> {% for sol in sol_set %}
+            <tr>
+                <td><a href="/student/sol_detail_t/{{sol.id}}">{{ sol.title }}</a></td>
+                <td>{{ sol.submission_date }}</td>
+
+                <td>{{ sol.student.user.username }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+
+<br><br><br><br><br><br>
+{% endblock content %}

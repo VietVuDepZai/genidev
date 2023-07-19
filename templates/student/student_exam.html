@@ -65,7 +65,7 @@
         <td> {{t.course_name}}</td>
 
 
-        <td>{{t.date}}</td>
+        <td id="date">{{t.date}}</td>
         <td><a style="color:white" class="btn btn-info btn-xs" href="{% url 'view-exam' t.id  %}"><span
               class="fas fa-eye"></span></a>
         </td>
@@ -84,7 +84,7 @@
         <td> {{t.course_name}}</td>
 
 
-        <td>{{t.date}}</td>
+        <td id="date">{{t.date}}</td>
         <td><a style="color:white" id="take_exam" class="btn btn-danger btn-xs" href="{% url 'take-exam' t.id  %}"><span
               class="fas fa-arrow-right"></span></a>
         </td>
@@ -106,6 +106,10 @@
 <script>
   exam_btn = document.getElementById("take_exam")
 
+  let text = document.getElementById("date").innerHTML
+  let result = text.slice(0, 12);
+
+  document.getElementById("date").innerHTML = result;
 </script>
 <br><br><br><br><br><br>
 {% endblock content %}

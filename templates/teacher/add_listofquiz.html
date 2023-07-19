@@ -1,0 +1,36 @@
+{% extends 'teacher/teacherbase.html' %}
+{% block content %}
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <link href="http://netdna.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <style>
+        a:link {
+            text-decoration: none;
+        }
+    </style>
+</head>
+<h2 style="text-align:center; color:blue;">ADD LISTOFQUIZ</h2>
+<form method="POST" autocomplete="off" style="margin:100px;margin-top: 0px;">
+    {%csrf_token%}
+    <div class="form-group">
+        {{courseForm.media}}
+        {{courseForm.as_p}}
+    </div>
+
+
+    <button type="submit" class="btn btn-primary">ADD</button>
+</form>
+<script>
+    var label = document.getElementsByTagName("label")
+    label[5].innerText = "Limited time to end the course:"
+</script>
+<br><br><br>
+{% endblock content %}

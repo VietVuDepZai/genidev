@@ -9,6 +9,7 @@ path('teacherlogin', LoginView.as_view(template_name='teacher/teacherlogin.html'
 path('teachersignup', views.teacher_signup_view,name='teachersignup'),
 path('teacher-dashboard', views.teacher_dashboard_view,name='teacher-dashboard'),
 # Exams
+path('user-attendance',views.teacher_attendance,name="user-attendance"),
 path('teacher-exam', views.teacher_exam_view,name='teacher-exam'),
 path('teacher-add-exam', views.teacher_add_exam_view,name='teacher-add-exam'),
 path('teacher-view-exam', views.teacher_view_exam_view,name='teacher-view-exam'),
@@ -56,5 +57,14 @@ path("teacher-view-class-student/<slug>", views.teacher_view_student_class, name
 # path('create_member/', views.createMember),
 # path('get_member/', views.getMember),
 # path('delete_member/', views.deleteMember),
-
+#Quiz
+path('listofcourse/',views.view_listofcourse,name="listofcourse"),
+path('add_listofcourse/',views.add_listofcourse,name="add_listofcourse"),
+path('listofquiz/<int:id>',views.view_listofquiz,name="listofquiz"),
+path('add_listofquiz/',views.admin_add_listofquiz,name="add_listofquiz"),
+path('update_listofquiz/<int:id>',views.update_listofquiz, name="update_listofquiz"),
+path('update_listofcourse/<int:id>',views.update_listofcourse,name="update_listofcourse"),
+path('view_listofquiz/<int:id>',views.listofquiz_view_detail,name="view_listofquiz"),
+path('delete_listofquiz/<int:id>',views.delete_listofquiz,name="delete_listofquiz"),
+path('add_quiz',views.add_quiz,name="add_quiz"),
 ]

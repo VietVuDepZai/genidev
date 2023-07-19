@@ -1,4 +1,4 @@
-from django.shortcuts import render,redirect,reverse
+from django.shortcuts import render,redirect,HttpResponse
 from . import forms,models
 from django.contrib.auth import authenticate, login, logout
 from django.db.models import Sum
@@ -16,6 +16,7 @@ from parents import models as PMODEL
 from teacher import forms as TFORM
 from student import forms as SFORM
 from parents import forms as PFORM
+from twilio.rest import Client
 from django.contrib.auth.models import User
 from django import  forms as DJFORM
 from django.utils import timezone
@@ -26,7 +27,22 @@ from agora_token_builder import RtcTokenBuilder
 from .models import RoomMember
 import json
 from django.views.decorators.csrf import csrf_exempt
-
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+import zerosms
+from quiz.serializers import AttendanceSerializer
+from quiz.models import  Attendance
+from quiz import trainer, face_recognizer, photos_path, utility
+from sms import send_sms
+from math import ceil
+import base64
+import os
+import time
+import datetime
+from json import loads
+from _thread import start_new_thread
+import messagebird
 
 
 # Administrators
@@ -37,6 +53,7 @@ from django.views.decorators.csrf import csrf_exempt
 #         return render(request,'quiz/index.html')
 
 
+
 def home_view(request):
 	if request.user.is_authenticated:
 		return HttpResponseRedirect('afterlogin')  
@@ -44,11 +61,21 @@ def home_view(request):
 		if request.method == 'POST':
 			username = request.POST.get('username')
 			password =request.POST.get('password')
-
 			user = authenticate(request, username=username, password=password)
-
+			now=datetime.datetime.now()
 			if user is not None:
 				login(request, user)
+				if now.hour<13:
+					if now.hour<9:
+						data_rec = {'user': user.id, 'date': datetime.datetime.now(),'late':True , 'inout': True}
+					else:
+						data_rec = {'user': user.id, 'date': datetime.datetime.now(),'late':None , 'inout': True}
+
+				else:
+					data_rec = {'user': user.id, 'date': datetime.datetime.now(),'late':None , 'inout': False}
+				serializer = AttendanceSerializer(data=data_rec)
+				if serializer.is_valid():
+					serializer.save()
 				return HttpResponseRedirect('afterlogin')
 			else:
 				pass
@@ -63,6 +90,72 @@ def is_student(user):
 
 def is_parents(user):
     return user.groups.filter(name='PARENTS').exists()
+
+def login_face(request):
+    return render(request,"quiz/login_face.html")
+
+def recieve_login_face(request):
+
+    photos = request.POST.getlist('photos[]')
+    paths = []
+    for i, photo in enumerate(photos):
+        ext, img = photo.split(';base64,')
+        
+        ext = ext.split('/')[-1]
+        
+        name = 'static/temp/rec' + str(i) + '.' + ext
+        fh = open(name, 'wb')
+        fh.write(base64.b64decode(img))
+        fh.close()
+        paths.append('static/temp/rec' + str(i) + '.' + ext)
+    utility.crop_photos(paths=paths)
+    user_id, percentage = face_recognizer.get_image_label(*paths)
+
+    if user_id in (-1,0, None): 
+        name = 'Unknown'
+        
+    else:
+        user = User.objects.get(id=user_id)
+        #manually set the backend attribute
+        user.backend = 'django.contrib.auth.backends.ModelBackend'
+        login(request, user)
+        name= User.objects.get(id=user_id).username
+    now=datetime.datetime.now()
+    if now.hour<13:
+        if now.hour<9:
+            data_rec = {'user': user_id, 'date': datetime.datetime.now(),'late':True , 'inout': True}
+        else:
+            data_rec = {'user': user_id, 'date': datetime.datetime.now(),'late':None , 'inout': True}
+
+    else:
+        data_rec = {'user': user_id, 'date': datetime.datetime.now(),'late':None , 'inout': False}
+    serializer = AttendanceSerializer(data=data_rec)
+    if serializer.is_valid() and percentage >= 0:
+        serializer.save()
+    return JsonResponse({'id': user_id, 'name': name, 'percentage': percentage})
+
+def capture_user(request):
+    if is_student(request.user):   
+        accountapproval=SMODEL.Student.objects.all().filter(user_id=request.user.id,status=True)
+        if accountapproval:
+            return HttpResponseRedirect('/student/student-dashboard')
+        else:
+            return render(request,'quiz/capture_signup.html',{'users':accountapproval})
+    if is_parents(request.user):
+        accountapproval=PMODEL.Parents.objects.all().filter(user_id=request.user.id,status=True)
+        if accountapproval:
+            return HttpResponseRedirect('/parents/parents-dashboard')
+        else:
+            return render(request,'quiz/capture_signup.html',{'users':accountapproval})
+    if is_teacher(request.user):
+        accountapproval=TMODEL.Teacher.objects.all().filter(user_id=request.user.id,status=True)
+        if accountapproval:
+            return HttpResponseRedirect('/teacher/teacher-dashboard')
+        else:
+            return render(request,'quiz/capture_signup.html',{'users':accountapproval})
+    else:
+        return redirect('admin-dashboard')
+
 
 def afterlogin_view(request):
     if is_student(request.user):   
@@ -93,6 +186,17 @@ def adminclick_view(request):
         return HttpResponseRedirect('afterlogin')
     return HttpResponseRedirect('adminlogin')
 
+def number(request):
+    #if test_result is less than 80 execute this
+        #twilio code
+    client = messagebird.Client("6qz52AzABdmo1J9B3wQfzOtVp")
+    message = client.message_create(
+        'TestMessage',
+        '31687654321',
+        'This is a test message',
+        { 'reference' : 'Foobar' }
+    )
+    return render(request,'quiz/send_sms.html')
 
 @login_required(login_url='adminlogin')
 def admin_dashboard_view(request):
@@ -713,3 +817,341 @@ def contactus_view(request):
 
 def comingsoon(request):
     return render(request,'quiz/comingsoon.html')
+
+#!/usr/bin/env python3
+
+
+@login_required(login_url='adminlogin')
+def home(request):
+
+    return render(request, "recognition/home.html",
+                  {'photos': trainer.get_nbr_photos(),
+                   'users': User.objects.count(),
+                   'last_training': utility.last_training()}, )
+
+@login_required(login_url='adminlogin')
+def about(request):
+
+    return render(request, 'recognition/about.html', {})
+
+
+@login_required(login_url='adminlogin')
+def capture(request):
+
+    if User.objects.count() == 0:
+        return redirect('/adduser/?status=empty')
+    return render(request, 'recognition/capture.html', {'users': User.objects.all()})
+
+@login_required(login_url='adminlogin')
+def display_users(request):
+
+    return render(request, 'recognition/user.html', {'users': User.objects.all()})
+
+
+def train(request):
+
+    if not utility.are_there_photos():
+        return redirect('/capture/?status=empty')
+    return render(request, 'recognition/train.html')
+
+
+
+
+def receive_images(request):
+    label = request.POST.get('label')
+    photos = request.POST.getlist('photos[]')
+    start_new_thread(utility.save_base64_photos, (label, photos))
+    return HttpResponse()
+
+
+def receive_train(request):
+
+    start = time.time()
+    trainer.train()
+    start_new_thread(face_recognizer.reload, ())
+    duration = ceil(time.time() - start)
+    return JsonResponse({'duration': duration})
+
+
+def profile(request, id=1):
+
+    user_data = User.objects.get(pk=id)
+    images = [filename for filename in os.listdir(photos_path) if filename.split('_')[0] == str(id)]
+    return render(request, 'recognition/profile.html', {'user': user_data, 'images': images})
+
+
+def delete_user(request):
+
+    user_id = request.POST.get('id')
+    User.objects.filter(id=user_id).delete()
+    Attendance.objects.filter(id=user_id).delete()
+    images = [filename for filename in os.listdir(photos_path) if filename.split('_')[0] == str(id)]
+    for image in images:
+        os.remove('static/photos/' + image)
+    return HttpResponse()
+
+
+def recognize_camera(request):
+
+    if not utility.is_model_trained():
+        return redirect('/train/?status=untrained')
+    return render(request, 'recognition/camera.html')
+
+
+def receive_recognize(request):
+
+    photos = request.POST.getlist('photos[]')
+    paths = []
+    for i, photo in enumerate(photos):
+        ext, img = photo.split(';base64,')
+        
+        ext = ext.split('/')[-1]
+        
+        name = 'static/temp/rec' + str(i) + '.' + ext
+        fh = open(name, 'wb')
+        fh.write(base64.b64decode(img))
+        fh.close()
+        paths.append('static/temp/rec' + str(i) + '.' + ext)
+    utility.crop_photos(paths=paths)
+    user_id, percentage = face_recognizer.get_image_label(*paths)
+    
+    if user_id in (-1,0, None): 
+        name = 'Unknown'
+        
+    else:
+        name= User.objects.get(id=user_id).username
+    now=datetime.datetime.now()
+    if now.hour<13:
+        if now.hour<9:
+            data_rec = {'user': user_id, 'date': datetime.datetime.now(),'late':True , 'inout': True}
+        else:
+            data_rec = {'user': user_id, 'date': datetime.datetime.now(),'late':None , 'inout': True}
+
+    else:
+        data_rec = {'user': user_id, 'date': datetime.datetime.now(),'late':None , 'inout': False}
+    serializer = AttendanceSerializer(data=data_rec)
+    if serializer.is_valid() and percentage >= 0:
+        serializer.save()
+    return JsonResponse({'id': user_id, 'name': name, 'percentage': percentage})
+
+
+def recognize_photo(request):
+
+    if not utility.is_model_trained():
+        return redirect('/train/?status=untrained')
+    return render(request, 'recognition/recognise_photo.html')
+
+
+def view_photos(request):
+
+    users = User.objects.all()
+    data = []
+    for user in users:
+        images = [filename for filename in os.listdir(photos_path) if filename.split('_')[0] == str(user.id)]
+        data.append({'user': user.username, 'images': images})
+    return render(request, 'recognition/viewPhoto.html', {'data': data})
+
+
+
+
+class AttendanceRecord(APIView):
+    def post(self, request, format=None):
+        data = loads(request.body)
+        operation = int(data['operation'])
+        if operation == 100:  # Sent images to recognize
+            date = datetime.datetime.fromtimestamp(int(data['date']))
+            if date.hour <= 13:
+                inout = True
+
+                if date.hour<=9:
+                        late = None
+                else:
+                        late = True
+        
+            else:
+                inout=False
+                late= None
+
+            paths = []
+            for i, photo in enumerate(data['images']):
+                name = 'static/temp/rec' + str(i) + '.png'
+                with open(name, 'wb') as fh:
+                    fh.write(base64.b64decode(photo))
+                paths.append(name)
+
+        elif operation == 200:  # Remote capture photos
+            date = datetime.datetime.now()
+            paths = utility.remote_capture(3)
+            inout = None
+
+        utility.crop_photos(paths=paths)
+        user_id, percentage = face_recognizer.get_image_label(*paths)
+        if user_id not in (-1, None) and percentage > 0:
+            data_rec = {'user': user_id, 'date': date, 'late': late,'inout': inout}
+            serializer = AttendanceSerializer(data=data_rec)
+            if serializer.is_valid():
+                # Add DB records
+                serializer.save()
+                inout = Attendance.objects.last().inout
+                print("----------------")
+                print(inout)
+                # Run assigned tasks
+                #tasks.do_user_tasks(user_id, inout=inout)
+                # Save captured images for future training
+                # utility.add_new_user_photos(user=user_id, path=paths[0])
+                user = User.objects.get(id=user_id)
+                json_data = {'user': user.first_name + ' ' + user.last_name, 'department':user.department,'late':late,'inout': inout}
+                return JsonResponse(json_data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+def attendance(request):
+
+    return render(request, 'recognition/attendance.html', {'attendance': Attendance.objects.all().order_by("-id")})
+
+def quiz_attendance(request):
+
+    return render(request, 'quiz/attendance.html', {'attendance': Attendance.objects.all().order_by("-id")})
+
+
+@login_required(login_url='adminlogin')
+def assignments(request):
+    return render(request, 'quiz/assignments.html', {'assignments': models.Assignment.objects.all().order_by("-id")})
+
+@login_required(login_url='adminlogin')
+def view_assignments(request, assign_id):
+    assign = models.Assignment.objects.get(id=assign_id)
+    assign_form = forms.AssignmentForm(instance=assign) 
+    sol_set = models.Solution.objects.filter(assignment__id=assign_id)
+
+    return render(request, 'quiz/details_t.html', {'assignment': assign,'sol_set':sol_set,'form':assign_form})
+
+@login_required(login_url='adminlogin')
+def add_assign(request):
+    form = forms.AssignmentForm()
+
+    if request.method == 'POST':
+        form = forms.AssignmentForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('/assignment')
+
+    else:
+        # print(request.user)
+        # usr_year = UserProfile.objects.get(user=request.user).year
+        # usr_assign = Assignment.objects.filter(year=usr_year)
+        form = forms.AssignmentForm()
+    return render(request, 'quiz/add_assign.html', {'form': form})
+
+@login_required(login_url='adminlogin')
+def sol_detail_t(request,sol_id):
+    sol=models.Solution.objects.get(id=sol_id)
+    sol_f = forms.SolutionForm(instance=sol)
+    form = forms.SolCreditForm()
+    if request.method=='POST':
+        form = forms.SolCreditForm(data=request.POST)
+        stt=request.POST['comments']
+        sol.comments=stt
+        sol.points=request.POST['points']
+        sol.save()
+        return redirect('/assignment')
+
+
+    return render(request,'quiz/sol_details_t.html',{'sol_f':sol_f, 'sol':sol,'form':form})
+
+@login_required(login_url='adminlogin')
+def view_listofcourse(request):
+    listofcourse  = models.ListOfCourses.objects.all().order_by("-id")
+    return render(request,'quiz/listofcourse.html',{'listofcourse':listofcourse})
+
+@login_required(login_url='adminlogin')
+def add_listofcourse(request):
+    form =forms.ListOfCourse()
+    if request.method == "POST":
+        form = forms.ListOfCourse(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('/listofcourse')
+        else:
+            return redirect('/add_listofcourse')
+   
+
+    return render(request,'quiz/add_listofcourse.html',{'form':form})
+
+@login_required(login_url='adminlogin')
+def update_listofcourse(request,id):
+    course = models.ListOfCourses.objects.get(id=id)
+    form =forms.ListOfCourse(instance=course)
+    if request.method == "POST":
+        form = forms.ListOfCourse(request.POST, request.FILES,instance=course)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('/listofcourse')
+        else:
+            return redirect('/update_listofcourse')
+   
+
+    return render(request,'quiz/update_listofcourse.html',{'form':form})
+
+@login_required(login_url='adminlogin')
+def view_listofquiz(request, id):
+    listofcourse  = models.ListOfCourses.objects.get(id=id)
+    listofquiz  = models.ListOfQuiz.objects.filter(course=listofcourse).order_by("-id")
+    return render(request,'quiz/listofquiz.html',{'courses':listofquiz,'resource':listofcourse})
+
+@login_required(login_url='adminlogin')
+def admin_add_listofquiz(request):
+    courseForm=forms.ListOfQuiz()
+    if request.method=='POST':
+        courseForm=forms.ListOfQuiz(request.POST)
+        if courseForm.is_valid():        
+            courseForm.save()
+        else:
+            print("form is invalid")
+        return HttpResponseRedirect('/listofcourse')
+    return render(request,'quiz/add_listofquiz.html',{'courseForm':courseForm})
+
+@login_required(login_url='adminlogin')
+def update_listofquiz(request, id):
+    course = models.ListOfQuiz.objects.get(id=id)
+    courseForm=forms.ListOfQuiz(instance=course)
+    if request.method=='POST':
+        courseForm=forms.ListOfQuiz(request.POST,instance=course)
+        if courseForm.is_valid():        
+            courseForm.save()
+        else:
+            print("form is invalid")
+        return HttpResponseRedirect('/listofcourse')
+    return render(request,'quiz/update_listofquiz.html',{'courseForm':courseForm})
+
+@login_required(login_url='adminlogin')
+def listofquiz_view_detail(request, id):
+    course = models.ListOfQuiz.objects.get(id=id)
+    questions=models.Quiz.objects.filter(course=course)
+    return render(
+        request=request,
+        template_name='quiz/admin_view_course_detail.html',
+        context={"course": course,"questions": questions}
+        )
+
+@login_required(login_url='adminlogin')
+def delete_listofquiz(request, id):    
+    course=models.ListOfQuiz.objects.get(id=id)
+    course.delete()
+    return HttpResponseRedirect(f'/listofquiz/{id}')
+
+
+@login_required(login_url='adminlogin')
+def add_quiz(request):
+    questionForm=forms.Quiz()
+    if request.method=='POST':
+        questionForm=forms.Quiz(request.POST)
+        if questionForm.is_valid():
+            question=questionForm.save(commit=False)
+            id = question.course.id
+            question.save()       
+        else:
+            print("form is invalid")
+        return HttpResponseRedirect(f'/view_listofquiz/{id}')
+    return render(request,'quiz/add_quiz.html',{'questionForm':questionForm})

@@ -1,0 +1,50 @@
+{% extends 'quiz/adminbase.html' %}
+{% load widget_tweaks %}
+{% block content %}
+{% load static %}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<link href="http://netdna.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+<link href="{% static 'css/attendance.css' %}" rel="stylesheet">
+<link href="{% static 'css/dhtmlxcalendar.css' %}" rel="stylesheet">
+<style>
+    p[data-f-id="pbf"] {
+        display: none;
+    }
+</style>
+<div class="container">
+    <h3>{% render_field assignment.name %}</h1>
+        <h5>Deadline: {% render_field assignment.deadline %}
+    </h3>
+    <h4>Questions:</h4>
+    <p>{% render_field assignment.questions %}</p>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>SubDate</th>
+            <th>Author</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if sol_set %}
+        {% for sol in sol_set %}
+        <tr>
+            <td><a href="/sol_detail_t/{{sol.id}}">{{ sol.title }}</a></td>
+            <td>{{ sol.submission_date }}</td>
+
+            <td>{{ sol.student.user.username }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+{% endblock %}

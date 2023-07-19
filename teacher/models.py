@@ -11,7 +11,7 @@ class Tag(models.Model):
         return self.name
 class Teacher(models.Model):
     user=models.OneToOneField(User,on_delete=models.CASCADE)
-    profile_pic= models.ImageField(upload_to='profile_pic/Teacher/',null=True,blank=True)
+    profile_pic= models.ImageField(upload_to='profile_pic/',null=True,blank=True)
     address = models.CharField(max_length=40)
     mobile = models.CharField(max_length=20,null=False)
     status= models.BooleanField(default=False)
@@ -39,7 +39,7 @@ class Classroom(models.Model):
     published = models.DateTimeField("Date published", default=timezone.now)
     modified = models.DateTimeField("Date modified", default=timezone.now)
     author = models.ForeignKey(Teacher, default=1, on_delete=models.CASCADE)
-    image = models.ImageField(default='profile_pic/Teacher/no_image.jpg', upload_to="profile_pic/Teacher/" ,max_length=255)
+    image = models.ImageField(default='profile_pic/no_image.jpg', upload_to="profile_pic/" ,max_length=255)
 
     def __str__(self):
         return self.title

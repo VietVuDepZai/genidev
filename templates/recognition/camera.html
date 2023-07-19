@@ -1,0 +1,125 @@
+{% extends 'recognition/base.html' %}
+{% load static %}
+{% block title %}Camera{% endblock %}
+{% block content %}
+{% block css %}
+<link href="{% static 'css/camera.css' %}" rel="stylesheet">
+{% endblock %}
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <video id="video" width="640" height="480" autoplay="true" class="img-thumbnail"></video>
+            <div class="clock-canvas" style="position: absolute; top: 0px; left: 0px;">
+                <div class="kineticjs-content" role="presentation"
+                    style="display: inline-block; width: 200px; height: 200px;">
+                    <canvas width="200" height="200"
+                        style="padding: 0px; margin: 0px; border: 0px; background: transparent; position: absolute; top: 0px; left: 0px; width: 200px; height: 200px;"></canvas>
+                </div>
+                <div class="text">
+                    <p id="counter" class="val">3</p>
+                    <p class="type-seconds type-time"></p>
+                </div>
+            </div>
+        </div>
+        <div class="modal-body">
+            <button id="capture" class="btn btn-primary">Recognize</button>
+            <a>
+                <button id="go" class="btn btn-success" style="visibility: hidden"></button>
+            </a>
+        </div>
+        <div class="modal-footer">
+            <div class="progress">
+                <div id="percentage" class="progress-bar progress-bar-success progress-bar-striped" role="progressbar"
+                    aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<canvas id="canvas" width="320" height="240" style="visibility: hidden"></canvas>
+{% endblock %}
+{% block javascript %}
+<script>
+    /**
+     * Created by hussein on 5/15/17.
+     */
+    // Grab elements, create settings, etc.
+    counter = 3;
+    var photos = [];
+    var nbPhoto = 3;
+
+    // Get access to the camera!
+
+    const video = document.querySelector('#video')
+    if (navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then((stream) => {
+                video.srcObject = stream
+            })
+    }
+    // Elements for taking the snapshot
+    var canvas = document.getElementById('canvas');
+    var context = canvas.getContext('2d');
+    function takePhotos() {
+        context.drawImage(video, 0, 0, 320, 240);
+        photos[nbPhoto - counter] = document.getElementById("canvas").toDataURL("image/png");
+    }
+    // Trigger photo take
+    $('#capture').click(function () {
+        if (counter == 0)
+            return;
+        context.drawImage(video, 0, 0, 320, 240);
+        takePhotos();
+        counter--;
+        document.getElementById("counter").innerHTML = counter;
+        if (counter == 0) {
+            $.ajax({
+                headers: { "X-CSRFToken": getCookie('csrftoken') },
+                type: "POST",
+                url: "/recognizephoto/",
+                data: {
+                    photos: photos
+                },
+                success: function (data) {
+                    $('#go').prop('disabled', true);
+                    counter = 3;
+                    document.getElementById("counter").innerHTML = counter;
+                    if (data.id === null) {
+                        $('#go').hide();
+                        $('#percentage').css('width', '0%').attr('aria-valuenow', 0).html('');
+                        return;
+                    }
+                    document.getElementById("counter").innerHTML = counter;
+                    $('#go').html(data.name);
+                    $('#go').removeAttr('style');
+                    if (data.name == 'Unknown') {
+                        $('#percentage').css('width', '0%').attr('aria-valuenow', 0).html('');
+                        return;
+                    }
+                    $('#go').prop('disabled', false);
+                    $('#go').parent().attr('href', '/profile/' + data.id);
+                    var percent = String(data.percentage);
+                    $('#percentage').css('width', percent + '%').attr('aria-valuenow', percent).html(percent + ' %');
+
+                }
+            });
+        }
+    });
+
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}

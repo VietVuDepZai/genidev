@@ -12,6 +12,7 @@ from student import forms as SFORM
 from parents import models as PMODEL
 from parents import forms as PFORM
 from quiz import forms as QFORM
+from django.contrib.auth.models import User
 from django.http import JsonResponse
 import random
 import time
@@ -81,7 +82,8 @@ def teacher_student_view(request):
     return render(request,'teacher/teacher_student.html',context=dict)
 
     
-@login_required(login_url='adminlogin')
+@login_required(login_url='teacherlogin')
+@user_passes_test(is_teacher)
 def update_student_view(request,pk):
     student=SMODEL.Student.objects.get(id=pk)
     user=SMODEL.User.objects.get(id=student.user_id)
@@ -99,7 +101,8 @@ def update_student_view(request,pk):
             return redirect('admin-view-student')
     return render(request,'teacher/update_student.html',context=mydict)
 
-@login_required(login_url='adminlogin')
+@login_required(login_url='teacherlogin')
+@user_passes_test(is_teacher)
 def add_student_view(request):
     userForm=SFORM.StudentUserForm()
     studentForm=SFORM.StudentForm()
@@ -360,7 +363,10 @@ def teacher_view_blog_view_detail(request, pk):
 # Marks
 @login_required(login_url='teacherlogin')
 def teacher_view_student_marks_view(request):
-    students= SMODEL.Student.objects.all()
+    teacher = models.Teacher.objects.get(user=request.user)
+    matching_article =  models.Classroom.objects.get(author=teacher)
+    students = SMODEL.Student.objects.filter(classroom=matching_article).order_by("-id")
+
     return render(request,'teacher/teacher_view_student_marks.html',{'students':students, 'teacher': models.Teacher.objects.get(user=request.user)})
 
 @login_required(login_url='teacherlogin')
@@ -426,7 +432,8 @@ def teacher_update_class(request, slug):
             }
         )
 
-@login_required(login_url='adminlogin')
+@login_required(login_url='teacherlogin')
+@user_passes_test(is_teacher)
 def teacher_view_student_class(request, slug): 
     room=models.Classroom.objects.filter(class_slug=slug).first() 
     student = SMODEL.Student.objects.filter(classroom=room).order_by("-id")
@@ -436,3 +443,119 @@ def teacher_view_student_class(request, slug):
         context={"object": room, "student": student,'teacher': models.Teacher.objects.get(user=request.user)}
         )
 
+def teacher_attendance(request):
+    room=models.Classroom.objects.get(author=models.Teacher.objects.get(user=request.user))
+
+    student = SMODEL.Student.objects.filter(classroom=room).order_by("-id")
+
+    return render(request, 'teacher/attendance.html', {'attendance': QMODEL.Attendance.objects.filter(user=SMODEL.Student.objects.get(classroom=room).user),'teacher':models.Teacher.objects.get(user=request.user)})
+
+
+
+@login_required(login_url='teacherlogin')
+@user_passes_test(is_teacher)
+def view_listofcourse(request):
+    listofcourse  = QMODEL.ListOfCourses.objects.all().order_by("-id")
+    return render(request,'teacher/listofcourse.html',{'listofcourse':listofcourse,'teacher':models.Teacher.objects.get(user=request.user)})
+
+@login_required(login_url='teacherlogin')
+@user_passes_test(is_teacher)
+def add_listofcourse(request):
+    form =QFORM.ListOfCourse()
+    if request.method == "POST":
+        form = QFORM.ListOfCourse(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('/teacher/listofcourse')
+        else:
+            return redirect('/teacher/add_listofcourse')
+   
+
+    return render(request,'teacher/add_listofcourse.html',{'form':form,'teacher':models.Teacher.objects.get(user=request.user)})
+
+@login_required(login_url='teacherlogin')
+@user_passes_test(is_teacher)
+def update_listofcourse(request,id):
+    course = QMODEL.ListOfCourses.objects.get(id=id)
+    form =QFORM.ListOfCourse(instance=course)
+    if request.method == "POST":
+        form = QFORM.ListOfCourse(request.POST, request.FILES,instance=course)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('/teacher/listofcourse')
+        else:
+            return redirect('/teacher/update_listofcourse')
+   
+
+    return render(request,'teacher/update_listofcourse.html',{'form':form,'teacher':models.Teacher.objects.get(user=request.user)})
+
+@login_required(login_url='teacherlogin')
+@user_passes_test(is_teacher)
+def view_listofquiz(request, id):
+    listofcourse  = QMODEL.ListOfCourses.objects.get(id=id)
+    listofquiz  = QMODEL.ListOfQuiz.objects.filter(course=listofcourse).order_by("-id")
+    return render(request,'teacher/listofquiz.html',{'courses':listofquiz,'resource':listofcourse,'teacher':models.Teacher.objects.get(user=request.user)})
+
+@login_required(login_url='teacherlogin')
+@user_passes_test(is_teacher)
+def admin_add_listofquiz(request):
+    courseForm=QFORM.ListOfQuiz()
+    if request.method=='POST':
+        courseForm=QFORM.ListOfQuiz(request.POST)
+        if courseForm.is_valid():        
+            courseForm.save()
+        else:
+            print("form is invalid")
+        return HttpResponseRedirect('/teacher/listofcourse')
+    return render(request,'teacher/add_listofquiz.html',{'courseForm':courseForm,'teacher':models.Teacher.objects.get(user=request.user)})
+
+@login_required(login_url='teacherlogin')
+@user_passes_test(is_teacher)
+def update_listofquiz(request, id):
+    course = QMODEL.ListOfQuiz.objects.get(id=id)
+    courseForm=QFORM.ListOfQuiz(instance=course)
+    if request.method=='POST':
+        courseForm=QFORM.ListOfQuiz(request.POST,instance=course)
+        if courseForm.is_valid():        
+            courseForm.save()
+        else:
+            print("form is invalid")
+        return HttpResponseRedirect('/teacher/listofcourse')
+    return render(request,'teacher/update_listofquiz.html',{'courseForm':courseForm,'teacher':models.Teacher.objects.get(user=request.user)})
+
+@login_required(login_url='teacherlogin')
+@user_passes_test(is_teacher)
+def listofquiz_view_detail(request, id):
+    course = QMODEL.ListOfQuiz.objects.get(id=id)
+    questions=QMODEL.Quiz.objects.filter(course=course)
+    return render(
+        request=request,
+        template_name='teacher/teacher_view_exam_detail.html',
+        context={"course": course,"questions": questions,'teacher':models.Teacher.objects.get(user=request.user)}
+        )
+
+@login_required(login_url='teacherlogin')
+@user_passes_test(is_teacher)
+def delete_listofquiz(request, id):    
+    course=QMODEL.ListOfQuiz.objects.get(id=id)
+    course.delete()
+    return HttpResponseRedirect(f'/teacher/listofquiz/{id}')
+
+
+@login_required(login_url='teacherlogin')
+@user_passes_test(is_teacher)
+def add_quiz(request):
+    questionForm=QFORM.Quiz()
+    if request.method=='POST':
+        questionForm=QFORM.Quiz(request.POST)
+        if questionForm.is_valid():
+            question=questionForm.save(commit=False)
+            id = request.POST.get('courseID')
+            course=QMODEL.ListOfQuiz.objects.get(id=id)
+            print(course)
+            question.course=course
+            question.save()       
+        else:
+            print("form is invalid")
+        return HttpResponseRedirect(f'/teacher/view_listofquiz/{id}')
+    return render(request,'teacher/add_quiz.html',{'questionForm':questionForm,'teacher':models.Teacher.objects.get(user=request.user)})

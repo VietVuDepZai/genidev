@@ -30,7 +30,7 @@ def parents_signup_view(request):
             parents=parentsForm.save(commit=False)
             parents.user=user
             parents.save()
-            my_parents_group = Group.objects.get_or_create(name='parents')
+            my_parents_group = Group.objects.get_or_create(name='PARENTS')
             my_parents_group[0].user_set.add(user)
         return HttpResponseRedirect('parentslogin')
     return render(request,'parents/parentssignup.html',context=mydict)
@@ -174,3 +174,7 @@ def parents_view_blog_view_detail(request, pk):
                'comment_form': comment_form,
                'parents':models.Parents.objects.get(user=request.user)}
     return render(request, 'parents/parents_view_docs_detail.html', context) 
+
+def parents_attendance(request):
+    return render(request, 'parents/attendance.html', {'attendance': QMODEL.Attendance.objects.filter(user=models.Parents.objects.get(user=request.user).student_model.user).order_by("-id"),'parents':models.Parents.objects.get(user=request.user)})
+

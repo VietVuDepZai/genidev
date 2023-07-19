@@ -9,7 +9,6 @@
   <meta charset="utf-8">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
   <link href="http://netdna.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
   <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
@@ -304,6 +303,35 @@
       text-transform: uppercase;
       display: inline-block;
     }
+
+    /* Modal */
+    .modal {
+      position: fixed;
+      top: 0;
+      right: 0;
+      left: 0;
+      bottom: 0;
+      display: flex;
+      animation: fadeIn linear 0.1221s;
+      z-index: 2
+    }
+
+    .modal__overlay {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4)
+    }
+
+    .modal__body {
+      margin: auto;
+      position: relative;
+      z-index: 3;
+    }
+
+    .invisible {
+      display: none !important;
+    }
   </style>
 
 
@@ -408,6 +436,7 @@
         </div>
 
         {% endfor %}
+        <br>
         <input id="submit" class="btn btn-info btn-lg" type="submit" value="Submit">
       </form>
 
@@ -418,19 +447,50 @@
 
     {% include "quiz/footer.html" %}
   </div>
+  <div id="modal" class="modal ">
+    <div id="overlay" class="modal__overlay"></div>
+    <div class="modal__body">
+      <!-- Auth Register -->
+      <div id="start" class="" style="width: 500px; background: white; height: 300px; border-radius: 5px;">
+        <br>
+        <p style="text-align: center; font-size: 28px; margin-top: 20px; display:block">Notification</p>
+        <p style="text-align: center; font-size: 20px; padding: 20px; display:block">I hope that you
+          need to follow
+          the rules, don't exit the full screen</p>
+        <button onclick="startExam()" class="btn btn-info"
+          style="display: block; margin:auto; padding: 7px 17px; font-size: 18px;">OK</button>
+      </div>
 
+      <div id="alarm" class="invisible" style="width: 500px; background: white; height: 300px; border-radius: 5px;">
+        <br>
+        <p style="text-align: center; font-size: 28px; margin-top: 20px; display:block">Alarm</p>
+        <p style="text-align: center; font-size: 20px; padding: 20px; display:block">You have exit the test <span
+            id="number"> </span> times, if you
+          exit 3 times, you will have 0 score in exam.</p>
+        <button onclick="startExam()" class="btn btn-info"
+          style="display: block; margin:auto; padding: 7px 17px; font-size: 18px;">OK</button>
+      </div>
+    </div>
+  </div>
 </body>
 
 </html>
-<script>
+<script src="{% static 'js/jquery.min.js' %}"></script>
 
+<script>
+  function startExam() {
+    const start = document.getElementById("start");
+    const modalbody = document.getElementById('modal')
+    modalbody.classList.add("invisible");
+    start.classList.add("invisible");
+  }
   $(document).ready(function () {
     $(".notification-drop .item").on('click', function () {
       $(this).find('ul').toggle();
     });
   });
-  function saveAns() {
 
+  function saveAns() {
     var ele = document.getElementsByTagName('input');
     for (i = 0; i < ele.length; i++) {
       if (ele[i].type = "radio") {
@@ -497,13 +557,7 @@
 
       // format countdown string + set tag value
       countdown.innerHTML = "<span id='mins'>" + minutes + ":</span><span id='second'>" + seconds + "</span>";
-
-
-
     }
-
-
-
   }
 
   function pad(n) {
@@ -511,10 +565,36 @@
   }
 
 
-
+  document.addEventListener("mouseover", () => {
+    document.documentElement.requestFullscreen().catch((e) => {
+      console.log(e.toString());
+    })
+  })
+  var escapenum = 0
   radio = document.getElementsByClassName("form-check-input")
   for (let index in radio) {
     const element = radio[index].checked;
+  }
+  if (document.addEventListener) {
+    document.addEventListener('fullscreenchange', exitHandler, false);
+    document.addEventListener('mozfullscreenchange', exitHandler, false);
+    document.addEventListener('MSFullscreenChange', exitHandler, false);
+    document.addEventListener('webkitfullscreenchange', exitHandler, false);
+  }
 
+  function exitHandler() {
+    if (!document.webkitIsFullScreen && !document.mozFullScreen && !document.msFullscreenElement) {
+      escapenum += 1
+      const number = document.getElementById("number")
+      const start = document.getElementById("alarm");
+      const modalbody = document.getElementById('modal')
+      modalbody.classList.remove("invisible");
+      start.classList.remove("invisible");
+      number.innerHTML = escapenum
+      if (escapenum == 3) {
+        submit_btn = document.getElementById("submit")
+        submit_btn.click()
+      }
+    }
   }
 </script>

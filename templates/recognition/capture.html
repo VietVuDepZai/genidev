@@ -1,0 +1,146 @@
+{% extends 'recognition/base.html' %}
+{% load static %}
+{% block css %}
+<link href="{% static 'css/capture.css' %}" rel="stylesheet">
+{% endblock %}
+{% block title %}Capture{% endblock %}
+{% block content %}
+{% if request.GET.status == 'empty' %}
+<div class="col-lg-2">
+    <div class="alert alert-dismissable alert-warning">
+        <button type="button" class="close" data-dismiss="alert">×</button>
+        <strong>Empty </strong>You need to capture some photos!
+    </div>
+</div>
+{% endif %}
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <video id="video" width="640" height="480" autoplay="true" class="img-thumbnail"></video>
+        </div>
+        <div class="modal-body">
+            <select id="device" class="form-control">
+                <option value="0">Local device</option>
+                <option value="1">Remote device</option>
+            </select><br>
+            <select id="user_id" class="form-control">
+                {% for user in users %}
+                <option value="{{ user.id }}">{{ user.username }}</option>
+                {% endfor %}
+            </select><br>
+            <input id="number" type="number" placeholder="Number" class="form-control" value="1"><br>
+            <button id="capture" class="btn btn-primary">Capture</button>
+        </div>
+    </div>
+</div>
+<canvas id="canvas" width="320" height="240" style="visibility: hidden"></canvas>
+{% endblock %}
+{% block javascript %}
+<script>
+    // Grab elements, create settings, etc.
+    $(function () {
+        $('#device').change(function () {
+            if ($('#device').val() == 0) {
+                $('.modal-header').empty();
+                $('.modal-header').prepend('<video id="video" width="640" height="480" class="img-thumbnail"></video>');
+            }
+            else {
+                $('.modal-header').empty();
+                $('.modal-header').prepend('<img id="image" src="http://192.168.0.2/cgi-bin/nph-zms?monitor=4" width=640 height=480 class="img-thumbnail"/>');
+            }
+        });
+    });
+
+    $.urlParam = function (name) {
+        var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+        if (results !== null)
+            return results[1] || 0;
+    };
+
+    var user = $.urlParam('user');
+    if (user !== null) {
+        $('#user_id').val(user);
+    }
+
+    const video = document.querySelector('#video')
+    if (navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then((stream) => {
+                video.srcObject = stream
+            })
+    }
+    // Elements for taking the snapshot
+    var canvas = document.getElementById('canvas');
+    var context = canvas.getContext('2d');
+
+    // Trigger photo take
+    $('#capture').click(function () {
+        var id = $('#user_id').val();
+        var number = $('#number').val();
+        if (id <= 0 || number <= 0) {
+            alert('ID and Number must have positive values!');
+            return;
+        }
+        alert('Taking ' + number + ' photos for user: ' + $('#user_id option[value="' + id + '"]').text() + '\nPress ok when ready.');
+        $(this).css('disabled', 'true');
+        if ($('#device').val() == 0) {
+            var photos = takePhotos(number);
+            $.ajax({
+                headers: { "X-CSRFToken": getCookie('csrftoken') },
+                type: "POST",
+                url: "/sendimage/",
+                data: {
+                    label: id,
+                    photos: photos
+                },
+                success: function () {
+                    $('#loader').removeClass('loader');
+                    alert('Uploaded!');
+                }
+            });
+        }
+        else {
+            alert('Ready?');
+            $.ajax({
+                type: "GET",
+                url: "/remotecapture/",
+                data: {
+                    user: id,
+                    number: number
+                },
+                success: function () {
+                    $('#loader').removeClass('loader');
+                    alert('Uploaded!');
+                }
+            });
+        }
+    });
+
+    function takePhotos(num) {
+        var photos = [];
+        for (var i = 0; i < num; i++) {
+            alert('Ready?');
+            context.drawImage(video, 0, 0, 320, 240);
+            photos[i] = document.getElementById("canvas").toDataURL("image/png");
+        }
+        return photos;
+    }
+
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+</script>
+{% endblock %}

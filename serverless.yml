@@ -1,0 +1,19 @@
+service: dlib-example
+
+provider:
+  name: aws
+  runtime: python3.8
+
+functions:
+  dlib:
+    handler: handler.main
+    layers:
+      - {Ref: PythonRequirementsLambdaLayer}
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: non-linux
+    layer: true

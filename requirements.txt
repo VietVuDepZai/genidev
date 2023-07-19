@@ -25,3 +25,8 @@ sqlparse==0.2.4
 cmake==3.26.4
 opencv-python==4.8.0.74
 face_recognition==1.2.3
+numpy
+scipy
+matplotlib 
+scikit-image 
+scikit-learn 

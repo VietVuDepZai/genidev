@@ -22,4 +22,6 @@ whitenoise==6.2.0
 crispy-bootstrap4
 django-crispy-forms
 sqlparse==0.2.4
+cmake==3.26.4
+opencv-python==4.8.0.74
 face_recognition==1.2.3

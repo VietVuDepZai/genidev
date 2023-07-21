@@ -113,7 +113,8 @@ DATABASES = {
 
 SMS_BACKEND = 'sms.backends.console.SmsBackend'
 
-
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 

@@ -93,7 +93,6 @@ class Trainer:
 #        for recognizer, name in zip((eigenface_rec, fisherface_rec), ('eigenface', 'fisherface')):
 #            recognizer.train(images, labels)
 #            recognizer.save(self.export + '_' + name + '.yml')
-
     def train(self):
         self.known_faces=[]
         print(len(os.listdir(self.photos)))

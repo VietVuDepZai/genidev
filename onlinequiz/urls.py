@@ -119,6 +119,7 @@ path('login_face', views.login_face),
     path('view_assign/<assign_id>', views.view_assignments, name="view_assign"),
     # Quiz
     path('listofcourse/',views.view_listofcourse,name="listofcourse"),
+    path('delete_listofcourse/<int:id>',views.delete_listofcourse,name="delete_listofcourse"),
     path('add_listofcourse/',views.add_listofcourse,name="add_listofcourse"),
     path('listofquiz/<int:id>',views.view_listofquiz,name="listofquiz"),
     path('add_listofquiz/',views.admin_add_listofquiz,name="add_listofquiz"),

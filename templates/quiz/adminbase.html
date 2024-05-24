@@ -252,6 +252,7 @@
   <header>
     <label for="check">
       <i style="position: fixed; right: 20px" class="fas fa-bars" id="sidebar_btn"></i>
+
     </label>
     <div class="left_area">
       <a style="text-decoration: none">
@@ -263,8 +264,8 @@
       </a>
     </div>
     <div class="right_area">
-      <a href="/logout" class="logout_btn"> <i class="fa fa-sign-out" style="color: white" aria-hidden="true"></i>
-      </a>
+      <a href="/logout" class="logout_btn"> <i class="fa fa-sign-out" style="color: white" aria-hidden="true"></i></a>
+
     </div>
   </header>
   <!--header area end-->
@@ -274,10 +275,14 @@
 
       <img src="{% static 'images/image/admin.png' %}" class="profile_image" alt="">
       <h4>{{request.user}}</h4>
-
+      <h5 style="    border-top: 1px solid cyan;
+    color: white;
+    width: 115px;
+    padding-top: 10px;
+    font-size: 15px;">(Admin)</h5>
     </center>
     <div class="list-tags" style="text-decoration: none">
-      <a style="text-decoration: none" href="/admin-dashboard"><i
+      <a id="dashboard" style="text-decoration: none" href="/admin-dashboard"><i
           class="fas fa-tachometer-alt"></i><span>Dashboard</span></a>
       <a style="text-decoration: none" href="/user_attendance"><i
           class="fas fa-clipboard-user"></i><span>Attendance</span></a>
@@ -376,6 +381,10 @@
   <!--content start-->
   <div class="content">
     <br><br><br>
+    <br><br><br>
+    <a style="cursor: pointer; color:white" id="train" class="logout_btn"> <i class="fas fa-cog fa-spin"
+        style="color: white" aria-hidden="true"></i> Train </a>
+
     {% block content %}
 
     {% endblock content %}
@@ -387,5 +396,19 @@
   </div>
   <!--content end-->
 </body>
+<script src="{% static 'js/jquery.min.js' %}"></script>
+
+<script>
+
+  $('#train').click(function () {
+
+    $.ajax({
+      type: "GET",
+      url: "/sendtrain/"
+
+    });
+  });
+
+</script>
 
 </html>

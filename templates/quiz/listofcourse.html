@@ -229,8 +229,11 @@
                     <a style="color:#1b2435; text-decoration: none;" href="/listofquiz/{{course.id}}">
                         <h3>{{course.name}}</h3>
                     </a>
-                    <p>Deadline: {{course.deadline}}</p>
-                    <a href="/update_listofcourse/{{course.id}}" class="button">Update</a>
+                    <p>Deadline: {{course.deadline}} <a style="margin-left: 10px;padding: 0.275rem 0.55rem;"
+                            href="/delete_listofcourse/{{course.id}}" class="btn btn-mini btn-danger"><i
+                                class="fas fa-trash"></i></a>
+                    </p>
+                    <a href="/update_listofcourse/{{course.id}}" class="button">Update </a>
 
                 </div>
             </div>

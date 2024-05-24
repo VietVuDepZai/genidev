@@ -34,7 +34,7 @@ SECRET_KEY = '@k0#p3kidu)yaaa3u1hplxz)f@^6xiy384*(+n@@s5x#1bx@m5'
 DEBUG = True
 
 USE_TZ = True 
-ALLOWED_HOSTS = ['0.0.0.0','onlinequiz-us1j.onrender.com','127.0.0.1','.vercel.app', '.now.sh','www.vutriviet.com','vutriviet.com','192.168.1.109']
+ALLOWED_HOSTS = ['0.0.0.0','onlinequiz-us1j.onrender.com','127.0.0.1','.vercel.app', '.now.sh','www.vutriviet.com','vutriviet.com','192.168.1.103']
 
 
 
@@ -58,12 +58,11 @@ INSTALLED_APPS = [
     'crispy_forms',
     'rest_framework',
     "sslserver",
-    'django_extensions'
+    'django_extensions',
 
 ]
 
 MIDDLEWARE = [
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

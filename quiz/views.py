@@ -44,7 +44,6 @@ from json import loads
 from _thread import start_new_thread
 import messagebird
 
-
 # Administrators
 # def home_view(request):
 #     try:
@@ -1094,6 +1093,13 @@ def update_listofcourse(request,id):
 
     return render(request,'quiz/update_listofcourse.html',{'form':form})
 
+
+@login_required(login_url='adminlogin')
+def delete_listofcourse(request, id):    
+    course=models.ListOfCourses.objects.get(id=id)
+    course.delete()
+    return HttpResponseRedirect('/listofcourse/')
+
 @login_required(login_url='adminlogin')
 def view_listofquiz(request, id):
     listofcourse  = models.ListOfCourses.objects.get(id=id)
@@ -1147,6 +1153,21 @@ def add_quiz(request):
     questionForm=forms.Quiz()
     if request.method=='POST':
         questionForm=forms.Quiz(request.POST)
+        if questionForm.is_valid():
+            question=questionForm.save(commit=False)
+            id = question.course.id
+            question.save()       
+        else:
+            print("form is invalid")
+        return HttpResponseRedirect(f'/view_listofquiz/{id}')
+    return render(request,'quiz/add_quiz.html',{'questionForm':questionForm})
+
+@login_required(login_url='adminlogin')
+def update_quiz(request, id):
+    question = models.Quiz.objects.get(id=id)
+    questionForm=forms.Quiz()
+    if request.method=='POST':
+        questionForm=forms.Quiz(request.POST, instance=question)
         if questionForm.is_valid():
             question=questionForm.save(commit=False)
             id = question.course.id

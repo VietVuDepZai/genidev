@@ -53,10 +53,9 @@ class CommentForm(forms.ModelForm):
 
 class AssignmentForm(forms.ModelForm):
     deadline = forms.DateField(widget=AdminDateWidget())
-    course=forms.ModelChoiceField(queryset=models.Course.objects.all(),empty_label="Course Name", to_field_name="id")
     class Meta:
         model=models.Assignment
-        fields=['name','questions','deadline','year','teacher','img']
+        fields=['name','questions','deadline','year','teacher','img','classroom']
 
 class SolCreditForm(forms.ModelForm):
 	class Meta:

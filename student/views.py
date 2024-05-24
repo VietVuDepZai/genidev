@@ -18,28 +18,26 @@ def studentclick_view(request):
         return HttpResponseRedirect('afterlogin')
     return render(request,'student/studentclick.html')
 
+
 def student_signup_view(request):
     userForm=forms.StudentUserForm()
-    studentForm=forms.StudentForm()
-    mydict={'userForm':userForm,'studentForm':studentForm}
+    StudentForm=forms.StudentForm()
+    mydict={'userForm':userForm,'StudentForm':StudentForm,}
     if request.method=='POST':
         userForm=forms.StudentUserForm(request.POST)
-        studentForm=forms.StudentForm(request.POST,request.FILES)
-        print("He1")
-        if userForm.is_valid() and studentForm.is_valid():
+        StudentForm=forms.StudentForm(request.POST,request.FILES)
+        if userForm.is_valid() and StudentForm.is_valid():
             user=userForm.save()
-            print("He2")
             user.set_password(user.password)
             user.save()
-            print("He")
-            student=studentForm.save(commit=False)
-            student.user=user
-            student.save()
-            print("He")
-            my_student_group = Group.objects.get_or_create(name='STUDENT')
-            my_student_group[0].user_set.add(user)
-            return HttpResponseRedirect('studentlogin')
+            parents=StudentForm.save(commit=False)
+            parents.user=user
+            parents.save()
+            my_parents_group = Group.objects.get_or_create(name='STUDENT')
+            my_parents_group[0].user_set.add(user)
+        return HttpResponseRedirect('studentslogin')
     return render(request,'student/studentsignup.html',context=mydict)
+
 
 def is_student(user):
     return user.groups.filter(name='STUDENT').exists()
@@ -265,7 +263,7 @@ def view_assignments(request, assign_id):
     assign_form = QFORM.AssignmentForm(instance=assign) 
     sol_set = QMODEL.Solution.objects.filter(assignment__id=assign_id)
 
-    return render(request, 'quiz/assignment.html', {'assignment': assign,'sol_set':sol_set,'form':assign_form,'student':models.Student.objects.get(user=request.user)})
+    return render(request, 'student/assignment.html', {'assignment': assign,'sol_set':sol_set,'form':assign_form,'student':models.Student.objects.get(user=request.user)})
 
 
 def sol_detail_t(request):

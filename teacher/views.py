@@ -559,3 +559,70 @@ def add_quiz(request):
             print("form is invalid")
         return HttpResponseRedirect(f'/teacher/view_listofquiz/{id}')
     return render(request,'teacher/add_quiz.html',{'questionForm':questionForm,'teacher':models.Teacher.objects.get(user=request.user)})
+
+
+@login_required(login_url='teacherlogin')
+def assignments(request):
+    return render(request, 'teacher/assignments.html', {'assignments': QMODEL.Assignment.objects.all().order_by("-id"),'teacher':models.Teacher.objects.get(user=request.user)})
+
+@login_required(login_url='teacherlogin')
+def view_assignments(request, assign_id):
+    assign = QMODEL.Assignment.objects.get(id=assign_id)
+    assign_form = QFORM.AssignmentForm(instance=assign) 
+    sol_set = QMODEL.Solution.objects.filter(assignment__id=assign_id)
+
+    return render(request, 'teacher/details_t.html', {'assignment': assign,'sol_set':sol_set,'form':assign_form})
+
+@login_required(login_url='teacherlogin')
+def add_assign(request):
+    form = QFORM.AssignmentForm()
+
+    if request.method == 'POST':
+        form = QFORM.AssignmentForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('/assignment')
+
+    else:
+        # print(request.user)
+        # usr_year = UserProfile.objects.get(user=request.user).year
+        # usr_assign = Assignment.objects.filter(year=usr_year)
+        form = QFORM.AssignmentForm()
+    return render(request, 'teacher/add_assign.html', {'form': form})
+
+@login_required(login_url='teacherlogin')
+def sol_detail_t(request,sol_id):
+    sol=QMODEL.Solution.objects.get(id=sol_id)
+    sol_f = QFORM.SolutionForm(instance=sol)
+    form = QFORM.SolCreditForm()
+    if request.method=='POST':
+        form = QFORM.SolCreditForm(data=request.POST)
+        stt=request.POST['comments']
+        sol.comments=stt
+        sol.points=request.POST['points']
+        sol.save()
+        return redirect('/assignment')
+
+
+    return render(request,'quiz/sol_details_t.html',{'sol_f':sol_f, 'sol':sol,'form':form})
+@login_required(login_url='teacherlogin')
+def update_quiz(request, id):
+    question = QMODEL.Quiz.objects.get(id=id)
+    questionForm=QFORM.Quiz(instance=question)
+    if request.method=='POST':
+        questionForm=QFORM.Quiz(request.POST, instance=question)
+        if questionForm.is_valid():
+            question=questionForm.save(commit=False)
+            id = question.course.id
+            question.save()
+        else:
+            print("form is invalid")
+        return HttpResponseRedirect(f'/teacher/view_listofquiz/{id}')
+    return render(request,'teacher/update_quiz.html',{'questionForm':questionForm,'teacher':models.Teacher.objects.get(user=request.user)})
+
+@login_required(login_url='teacherlogin')
+def delete_quiz(request,pk):
+    question = QMODEL.Quiz.objects.get(id=pk)
+    id = question.course.id
+    question.delete()
+    return HttpResponseRedirect(f'/teacher/view_listofquiz/{id}')

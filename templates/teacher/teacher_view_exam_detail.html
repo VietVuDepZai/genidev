@@ -253,6 +253,16 @@
 
     <div class="form">
         <h1 style="text-align: center;">{{course.course_name}}</h1>
+        <div class="card border-info card-body text-info">
+            <ul class="card-text" style="list-style:decimal;">
+                <li>Exam Name : {{course.course_name}}</li>
+                <li>Attempt : {{course.atempt}}</li>
+                <li>Total Question : {{course.total_marks}}</li>
+                <li>Total Marks : {{course.question_number}}</li>
+                <li>Max time to finish: {{course.limited_mins}} mins</li>
+            </ul>
+        </div>
+        <br>
         {% for q in questions%}
         <h3 class="text-info">{{ forloop.counter }}. {{q.question}}</h3>
         <h4 style="text-align: right;">[Marks {{q.marks}}]</h4>

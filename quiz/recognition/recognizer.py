@@ -8,7 +8,6 @@ from quiz.recognition.trainer import Trainer
 from quiz.recognition import face_cascade
 from PIL import Image
 
-
 class Recognizer:
     """
     The recognizer class contains a recognizer object that predicts the label of a given photo

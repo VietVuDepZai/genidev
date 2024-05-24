@@ -23,28 +23,29 @@
     </h3>
     <h4>Questions:</h4>
     <p>{% render_field assignment.questions %}</p>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>SubDate</th>
+                <th>Author</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if sol_set %}
+            {% for sol in sol_set %}
+            <tr>
+                <td><a href="/sol_detail_t/{{sol.id}}">{{ sol.title }}</a></td>
+                <td>{{ sol.submission_date }}</td>
+
+                <td>{{ sol.student.user.username }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Title</th>
-            <th>SubDate</th>
-            <th>Author</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% if sol_set %}
-        {% for sol in sol_set %}
-        <tr>
-            <td><a href="/sol_detail_t/{{sol.id}}">{{ sol.title }}</a></td>
-            <td>{{ sol.submission_date }}</td>
-
-            <td>{{ sol.student.user.username }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
 {% endif %}
 
 {% endblock %}

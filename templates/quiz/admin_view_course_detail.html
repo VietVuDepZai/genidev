@@ -257,8 +257,8 @@
             <ul class="card-text" style="list-style:decimal;">
                 <li>Exam Name : {{course.course_name}}</li>
                 <li>Attempt : {{course.atempt}}</li>
-                <li>Total Question : {{total_questions}}</li>
-                <li>Total Marks : {{total_marks}}</li>
+                <li>Total Question : {{course.total_marks}}</li>
+                <li>Total Marks : {{course.question_number}}</li>
                 <li>Max time to finish: {{course.limited_mins}} mins</li>
             </ul>
         </div>
@@ -406,6 +406,20 @@
         element.className = arr1.join(" ");
     }
 
+    var labels = document.getElementsByClassName("form-check-label")
+    for (label in labels) {
+        if (label.innerHTML == "None") {
+            label.style.display = "none"
+        }
+
+    }
+    function check() {
+        for (let index = 0; index < labels.length; index++) {
+            if (labels[index].innerHTML == "None") {
+                labels.style.display = "none"
+            }
+        }
+    }
     // // Add active class to the current button (highlight it)
     // var btnContainer = document.getElementById("myBtnContainer");
     // var btns = btnContainer.getElementsByClassName("btn");

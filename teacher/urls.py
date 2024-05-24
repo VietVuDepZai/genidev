@@ -57,6 +57,11 @@ path("teacher-view-class-student/<slug>", views.teacher_view_student_class, name
 # path('create_member/', views.createMember),
 # path('get_member/', views.getMember),
 # path('delete_member/', views.deleteMember),
+# Assignments
+    path('assignment/',views.assignments,name="assignment"),
+    path('add_assign/',views.add_assign,name="add_assign"),
+    path('sol_detail_t/<sol_id>', views.sol_detail_t, name='sol_detail_t'),
+    path('view_assign/<assign_id>', views.view_assignments, name="view_assign"),
 #Quiz
 path('listofcourse/',views.view_listofcourse,name="listofcourse"),
 path('add_listofcourse/',views.add_listofcourse,name="add_listofcourse"),

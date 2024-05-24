@@ -13,6 +13,7 @@ class ListOfCourses(models.Model):
     name = models.CharField(max_length=500)
     icon = models.ImageField(upload_to='profile_pic/',null=True,blank=True)
     deadline = models.DateField()
+    classroom = models.ForeignKey(TMODEL.Classroom,on_delete=models.CASCADE,null=True,blank=True)
     def __str__(self):
         return self.name 
     def autodelete(self):   
@@ -103,7 +104,7 @@ class Assignment(models.Model):
 		(4, 'Grade 9'),
 	)
 
-	course=models.ForeignKey(Course,on_delete=models.CASCADE)
+	classroom=models.ForeignKey(TMODEL.Classroom,on_delete=models.CASCADE,null=True,blank=True)
 	teacher=models.ForeignKey(Teacher,on_delete=models.CASCADE)
 	year = models.IntegerField(choices=YEAR_IN_COLLEGE_CHOICES, default=1)
 	name = models.CharField(max_length = 200)

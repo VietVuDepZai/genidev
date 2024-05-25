@@ -3,7 +3,6 @@ from . import forms,models
 from django.contrib.auth import authenticate, login, logout
 from django.db.models import Sum
 from django.contrib.auth.models import Group
-from django.contrib.auth.hashers import make_password, check_password
 from django.http import HttpResponseRedirect
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.conf import settings
@@ -16,10 +15,7 @@ from parents import models as PMODEL
 from teacher import forms as TFORM
 from student import forms as SFORM
 from parents import forms as PFORM
-from twilio.rest import Client
 from django.contrib.auth.models import User
-from django import  forms as DJFORM
-from django.utils import timezone
 from django.http import JsonResponse
 import random
 import time
@@ -30,11 +26,8 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-import zerosms
 from quiz.serializers import AttendanceSerializer
 from quiz.models import  Attendance
-from quiz import trainer, face_recognizer, photos_path, utility
-from sms import send_sms
 from math import ceil
 import base64
 import os
@@ -42,7 +35,6 @@ import time
 import datetime
 from json import loads
 from _thread import start_new_thread
-import messagebird
 
 # Administrators
 # def home_view(request):
@@ -90,70 +82,70 @@ def is_student(user):
 def is_parents(user):
     return user.groups.filter(name='PARENTS').exists()
 
-def login_face(request):
-    return render(request,"quiz/login_face.html")
+# def login_face(request):
+#     return render(request,"quiz/login_face.html")
 
-def recieve_login_face(request):
+# def recieve_login_face(request):
 
-    photos = request.POST.getlist('photos[]')
-    paths = []
-    for i, photo in enumerate(photos):
-        ext, img = photo.split(';base64,')
+#     photos = request.POST.getlist('photos[]')
+#     paths = []
+#     for i, photo in enumerate(photos):
+#         ext, img = photo.split(';base64,')
         
-        ext = ext.split('/')[-1]
+#         ext = ext.split('/')[-1]
         
-        name = 'static/temp/rec' + str(i) + '.' + ext
-        fh = open(name, 'wb')
-        fh.write(base64.b64decode(img))
-        fh.close()
-        paths.append('static/temp/rec' + str(i) + '.' + ext)
-    utility.crop_photos(paths=paths)
-    user_id, percentage = face_recognizer.get_image_label(*paths)
+#         name = 'static/temp/rec' + str(i) + '.' + ext
+#         fh = open(name, 'wb')
+#         fh.write(base64.b64decode(img))
+#         fh.close()
+#         paths.append('static/temp/rec' + str(i) + '.' + ext)
+#     utility.crop_photos(paths=paths)
+#     user_id, percentage = face_recognizer.get_image_label(*paths)
 
-    if user_id in (-1,0, None): 
-        name = 'Unknown'
+#     if user_id in (-1,0, None): 
+#         name = 'Unknown'
         
-    else:
-        user = User.objects.get(id=user_id)
-        #manually set the backend attribute
-        user.backend = 'django.contrib.auth.backends.ModelBackend'
-        login(request, user)
-        name= User.objects.get(id=user_id).username
-    now=datetime.datetime.now()
-    if now.hour<13:
-        if now.hour<9:
-            data_rec = {'user': user_id, 'date': datetime.datetime.now(),'late':True , 'inout': True}
-        else:
-            data_rec = {'user': user_id, 'date': datetime.datetime.now(),'late':None , 'inout': True}
+#     else:
+#         user = User.objects.get(id=user_id)
+#         #manually set the backend attribute
+#         user.backend = 'django.contrib.auth.backends.ModelBackend'
+#         login(request, user)
+#         name= User.objects.get(id=user_id).username
+#     now=datetime.datetime.now()
+#     if now.hour<13:
+#         if now.hour<9:
+#             data_rec = {'user': user_id, 'date': datetime.datetime.now(),'late':True , 'inout': True}
+#         else:
+#             data_rec = {'user': user_id, 'date': datetime.datetime.now(),'late':None , 'inout': True}
 
-    else:
-        data_rec = {'user': user_id, 'date': datetime.datetime.now(),'late':None , 'inout': False}
-    serializer = AttendanceSerializer(data=data_rec)
-    if serializer.is_valid() and percentage >= 0:
-        serializer.save()
-    return JsonResponse({'id': user_id, 'name': name, 'percentage': percentage})
+#     else:
+#         data_rec = {'user': user_id, 'date': datetime.datetime.now(),'late':None , 'inout': False}
+#     serializer = AttendanceSerializer(data=data_rec)
+#     if serializer.is_valid() and percentage >= 0:
+#         serializer.save()
+#     return JsonResponse({'id': user_id, 'name': name, 'percentage': percentage})
 
-def capture_user(request):
-    if is_student(request.user):   
-        accountapproval=SMODEL.Student.objects.all().filter(user_id=request.user.id,status=True)
-        if accountapproval:
-            return HttpResponseRedirect('/student/student-dashboard')
-        else:
-            return render(request,'quiz/capture_signup.html',{'users':accountapproval})
-    if is_parents(request.user):
-        accountapproval=PMODEL.Parents.objects.all().filter(user_id=request.user.id,status=True)
-        if accountapproval:
-            return HttpResponseRedirect('/parents/parents-dashboard')
-        else:
-            return render(request,'quiz/capture_signup.html',{'users':accountapproval})
-    if is_teacher(request.user):
-        accountapproval=TMODEL.Teacher.objects.all().filter(user_id=request.user.id,status=True)
-        if accountapproval:
-            return HttpResponseRedirect('/teacher/teacher-dashboard')
-        else:
-            return render(request,'quiz/capture_signup.html',{'users':accountapproval})
-    else:
-        return redirect('admin-dashboard')
+# def capture_user(request):
+#     if is_student(request.user):   
+#         accountapproval=SMODEL.Student.objects.all().filter(user_id=request.user.id,status=True)
+#         if accountapproval:
+#             return HttpResponseRedirect('/student/student-dashboard')
+#         else:
+#             return render(request,'quiz/capture_signup.html',{'users':accountapproval})
+#     if is_parents(request.user):
+#         accountapproval=PMODEL.Parents.objects.all().filter(user_id=request.user.id,status=True)
+#         if accountapproval:
+#             return HttpResponseRedirect('/parents/parents-dashboard')
+#         else:
+#             return render(request,'quiz/capture_signup.html',{'users':accountapproval})
+#     if is_teacher(request.user):
+#         accountapproval=TMODEL.Teacher.objects.all().filter(user_id=request.user.id,status=True)
+#         if accountapproval:
+#             return HttpResponseRedirect('/teacher/teacher-dashboard')
+#         else:
+#             return render(request,'quiz/capture_signup.html',{'users':accountapproval})
+#     else:
+#         return redirect('admin-dashboard')
 
 
 def afterlogin_view(request):

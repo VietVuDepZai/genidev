@@ -19,8 +19,6 @@ postgres==4.0
 psycopg2-binary~=2.9.3
 PyJWT==2.4.0
 whitenoise==6.2.0
-crispy-bootstrap4
 django-crispy-forms
 sqlparse==0.2.4
-opencv-contrib-python==4.7.0.72
-face-recognition==1.3.0
+pytz
